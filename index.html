@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Ultimate Guide to Prompt Engineering</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Soothing Neutrals -->
+    <!-- Application Structure Plan: A single-page application with a fixed left-hand navigation sidebar and a main content area. This structure was chosen for its intuitive navigation, allowing users to easily jump between logically grouped topics like 'Core Principles', 'Advanced Techniques', and 'Tools' without losing context. The non-linear exploration path is superior to a static document for a complex, multi-faceted topic like prompt engineering. Interactions like click-to-expand cards prevent information overload and encourage focused learning. -->
+    <!-- Visualization & Content Choices: Core Principles/Techniques -> Goal: Organize/Inform -> Viz: Interactive Cards -> Interaction: Click-to-expand -> Justification: Breaks down complex info into digestible chunks. Advanced Techniques -> Goal: Compare/Analyze -> Viz: Radar Chart (Chart.js) + Cards -> Interaction: Hover on chart, click cards for details -> Justification: The chart provides a high-level visual comparison, while cards offer deep-dive explanations. Tools/Libraries -> Goal: Inform -> Viz: Grid layout -> Interaction: Click to view details/links -> Justification: A clean, scannable way to present external resources. CONFIRMING NO SVG/Mermaid used. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc;
+        }
+        .nav-link {
+            transition: all 0.2s ease-in-out;
+            border-left: 3px solid transparent;
+        }
+        .nav-link.active {
+            border-left-color: #14b8a6;
+            color: #14b8a6;
+            background-color: #f0fdfa;
+        }
+        .card-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+        .card.active .card-content {
+            max-height: 500px;
+        }
+        .card.active .chevron {
+            transform: rotate(180deg);
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 400px;
+            }
+        }
+    </style>
+</head>
+<body class="text-slate-700">
+
+    <div class="flex min-h-screen">
+        <aside class="w-64 bg-white border-r border-slate-200 p-6 fixed top-0 left-0 h-full hidden lg:block">
+            <h1 class="text-xl font-bold text-teal-600 mb-8">Prompt Engineering</h1>
+            <nav id="desktop-nav" class="space-y-2">
+                <a href="#introduction" class="nav-link block font-medium text-slate-600 hover:text-teal-600 px-4 py-2 rounded-r-md">Introduction</a>
+                <a href="#core-principles" class="nav-link block font-medium text-slate-600 hover:text-teal-600 px-4 py-2 rounded-r-md">Core Principles</a>
+                <a href="#basic-techniques" class="nav-link block font-medium text-slate-600 hover:text-teal-600 px-4 py-2 rounded-r-md">Basic Techniques</a>
+                <a href="#advanced-techniques" class="nav-link block font-medium text-slate-600 hover:text-teal-600 px-4 py-2 rounded-r-md">Advanced Techniques</a>
+                <a href="#prompting-tools" class="nav-link block font-medium text-slate-600 hover:text-teal-600 px-4 py-2 rounded-r-md">Prompting Tools</a>
+                <a href="#prompt-libraries" class="nav-link block font-medium text-slate-600 hover:text-teal-600 px-4 py-2 rounded-r-md">Prompt Libraries</a>
+            </nav>
+        </aside>
+
+        <main class="w-full lg:ml-64 p-4 sm:p-8 md:p-12">
+            
+            <header class="lg:hidden mb-8">
+                 <h1 class="text-3xl font-bold text-teal-600">Prompt Engineering Guide</h1>
+                 <select id="mobile-nav" class="mt-4 w-full p-2 border rounded-md bg-white">
+                    <option value="#introduction">Introduction</option>
+                    <option value="#core-principles">Core Principles</option>
+                    <option value="#basic-techniques">Basic Techniques</option>
+                    <option value="#advanced-techniques">Advanced Techniques</option>
+                    <option value="#prompting-tools">Prompting Tools</option>
+                    <option value="#prompt-libraries">Prompt Libraries</option>
+                 </select>
+            </header>
+
+            <section id="introduction" class="mb-16 scroll-mt-24">
+                <h2 class="text-3xl font-bold text-slate-800 mb-4">Introduction to Prompt Engineering</h2>
+                <div class="space-y-4 text-lg text-slate-600">
+                    <p>Prompt Engineering is the art and science of designing effective inputs (prompts) to guide Large Language Models (LLMs) toward generating desired outputs. It's a critical skill for anyone using AI, as the quality of the prompt directly determines the quality of the response. Think of it as learning how to have a clear and productive conversation with an incredibly knowledgeable but very literal assistant.</p>
+                    <p>This interactive guide will walk you through the essential concepts, from the fundamental principles to advanced, cutting-edge techniques. By mastering these skills, you can unlock the full potential of LLMs for creative writing, complex problem-solving, code generation, and much more.</p>
+                </div>
+            </section>
+
+            <section id="core-principles" class="mb-16 scroll-mt-24">
+                <h2 class="text-3xl font-bold text-slate-800 mb-6">Core Principles</h2>
+                <p class="text-lg text-slate-600 mb-8">Effective prompting is built on a foundation of clear communication. These core principles apply to almost every interaction you'll have with an LLM. This section introduces the foundational ideas you need to get started. Click on each principle to learn more.</p>
+                <div class="space-y-4" id="principles-container"></div>
+            </section>
+            
+            <section id="basic-techniques" class="mb-16 scroll-mt-24">
+                <h2 class="text-3xl font-bold text-slate-800 mb-6">Basic Techniques</h2>
+                 <p class="text-lg text-slate-600 mb-8">These are the building blocks of prompt engineering. By providing examples within your prompt, you can significantly improve the model's accuracy and adherence to the desired format. Explore these fundamental techniques to see how context shapes AI responses.</p>
+                <div class="space-y-4" id="basic-techniques-container"></div>
+            </section>
+
+            <section id="advanced-techniques" class="mb-16 scroll-mt-24">
+                <h2 class="text-3xl font-bold text-slate-800 mb-6">Advanced Techniques</h2>
+                <p class="text-lg text-slate-600 mb-8">For complex tasks that require reasoning, planning, or creativity, basic techniques may not be enough. Advanced techniques provide structured methods to break down problems and guide the LLM through more sophisticated thought processes. The chart below compares these techniques across key attributes, and you can explore each one in detail below.</p>
+                <div class="bg-white p-4 sm:p-6 rounded-xl shadow-sm mb-8">
+                     <div class="chart-container">
+                        <canvas id="advancedTechniquesChart"></canvas>
+                    </div>
+                </div>
+                <div class="space-y-4" id="advanced-techniques-container"></div>
+            </section>
+
+            <section id="prompting-tools" class="mb-16 scroll-mt-24">
+                <h2 class="text-3xl font-bold text-slate-800 mb-6">Prompting Tools</h2>
+                <p class="text-lg text-slate-600 mb-8">As prompt engineering has grown, a rich ecosystem of tools has emerged to help users create, test, and manage prompts more effectively. These tools range from simple prompt optimizers to complex frameworks for building LLM-powered applications. Here are some of the most popular and useful tools available.</p>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="tools-container"></div>
+            </section>
+
+            <section id="prompt-libraries" class="scroll-mt-24">
+                <h2 class="text-3xl font-bold text-slate-800 mb-6">Prompt Libraries & Collections</h2>
+                 <p class="text-lg text-slate-600 mb-8">Why start from scratch when you can learn from the best? These community-driven collections contain thousands of high-quality prompts for a wide variety of tasks. They are an invaluable resource for inspiration, learning, and finding ready-to-use solutions for common problems.</p>
+                <div class="space-y-4" id="libraries-container"></div>
+            </section>
+        </main>
+    </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const sections = document.querySelectorAll('section');
+    const navLinks = document.querySelectorAll('.nav-link');
+    const mobileNav = document.getElementById('mobile-nav');
+
+    const principlesData = [
+        { title: 'Clarity and Specificity', icon: '🎯', content: 'Be as clear and specific as possible. Ambiguity leads to unpredictable results. Instead of "Write about dogs," try "Write a 500-word blog post about the benefits of adopting a senior dog, focusing on their calm demeanor and lower energy levels."' },
+        { title: 'Provide Context', icon: '📚', content: 'Give the model relevant context to frame its response. This includes background information, constraints, or any data it needs to perform the task. For example, when asking for a summary, provide the text to be summarized.' },
+        { title: 'Assign a Persona', icon: '🎭', content: 'Instruct the model to act as a specific character or expert. This helps shape the tone, style, and vocabulary of the response. For example, "Act as a world-class financial analyst and explain the concept of compound interest in simple terms."' },
+        { title: 'Define the Format', icon: '📝', content: 'Tell the model exactly how you want the output structured. Request lists, tables, JSON, Markdown, or any other format. Example: "List the top 5 largest planets in our solar system in a Markdown table with columns for Name, Diameter, and Mass."' },
+        { title: 'Use Delimiters', icon: '🚧', content: 'Use clear separators like triple quotes (`"""`), XML tags (`<tag>`), or dashes (`---`) to distinguish different parts of your prompt, such as instructions, context, and examples. This helps the model understand the structure of your input.' },
+    ];
+    
+    const basicTechniquesData = [
+        { title: 'Zero-Shot Prompting', icon: '🚀', content: 'This is the most basic form of prompting, where you ask the model to perform a task without giving it any prior examples. It relies entirely on the model\'s pre-existing knowledge. Example: "Classify the following movie review as positive or negative: \'This movie was fantastic!\'"' },
+        { title: 'One-Shot Prompting', icon: '☝️', content: 'You provide a single example of the task before making your request. This helps the model understand the expected format and context. Example: "Review: \'I loved this film.\' Sentiment: Positive. \n\nReview: \'It was a complete waste of time.\' Sentiment:"' },
+        { title: 'Few-Shot Prompting', icon: '🔢', content: 'You provide several examples (typically 2-5) to give the model a more robust understanding of the task. This is highly effective for improving accuracy on novel or complex tasks. Example: Provide 3-4 examples of text and their sentiment before asking it to classify a new one.' },
+    ];
+
+    const advancedTechniquesData = [
+        { title: 'Chain of Thought (CoT)', icon: '🧠', content: 'Encourage the model to "think step by step" by showing it examples where the reasoning process is written out. This helps it tackle complex problems that require logical deduction, such as math word problems or multi-step reasoning tasks.' },
+        { title: 'Self-Consistency', icon: '🔄', content: 'This technique involves prompting the model multiple times with the same prompt (using a higher "temperature" setting to get diverse outputs) and then selecting the most common answer. It improves reliability on tasks with a single correct answer.' },
+        { title: 'Tree of Thoughts (ToT)', icon: '🌳', content: 'A more advanced technique where the model explores multiple reasoning paths (like branches of a tree). It evaluates the intermediate steps and can backtrack or explore different options, making it powerful for problems that require planning or strategic thinking.' },
+        { title: 'Generated Knowledge', icon: '💡', content: 'For questions that require knowledge the model may not have, you first prompt it to generate relevant facts about the topic. Then, you use these generated facts as context in a second prompt to answer the original question, improving the accuracy of the final response.' },
+        { title: 'ReAct (Reason and Act)', icon: '🤖', content: 'This framework combines reasoning with action. The model generates both a thought process and an action (like searching a database or using a tool). The result of the action is then fed back into the model to inform the next thought-action cycle. It is used to build agents that can interact with external environments.' },
+    ];
+
+    const toolsData = [
+        { name: 'PromptPerfect', description: 'A tool designed to optimize your prompts. You input a basic prompt, and it rephrases it to be more effective for specific models like GPT-4 or Claude.' },
+        { name: 'LangChain', description: 'A powerful open-source framework for building applications with LLMs. It provides tools for chaining prompts, connecting to data sources, and creating autonomous agents.' },
+        { name: 'LlamaIndex', description: 'A data framework for connecting custom data sources to LLMs. It helps you ingest, structure, and access private or domain-specific data for more relevant responses.' },
+        { name: 'Vercel AI SDK', description: 'A library for building AI-powered user interfaces with React, Svelte, and other frontend frameworks. It helps manage streaming responses for a better user experience.' },
+        { name: 'FlowGPT', description: 'A community platform for sharing and discovering prompts. It functions like a marketplace where users can find prompts for a wide range of tasks and models.' },
+        { name: 'PromptBase', description: 'A marketplace for buying and selling high-quality prompts that produce the best results, saving you time and API costs on prompt engineering.' },
+    ];
+
+    const librariesData = [
+        { name: 'Awesome ChatGPT Prompts', url: 'https://github.com/f/awesome-chatgpt-prompts' },
+        { name: 'Hugging Face Prompts', url: 'https://huggingface.co/prompts' },
+        { name: 'Snack Prompt', url: 'https://snackprompt.com/' },
+    ];
+
+    function createCard(item, containerId) {
+        return `
+            <div class="card bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+                <button class="w-full text-left p-5 flex justify-between items-center focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-500" aria-expanded="false" aria-controls="${containerId}-${item.title.replace(/\s+/g, '-')}">
+                    <div class="flex items-center">
+                        <span class="text-2xl mr-4">${item.icon || '🛠️'}</span>
+                        <span class="font-semibold text-lg text-slate-800">${item.title}</span>
+                    </div>
+                    <span class="chevron text-2xl text-slate-400 transition-transform transform duration-300">▼</span>
+                </button>
+                <div class="card-content" id="${containerId}-${item.title.replace(/\s+/g, '-')}">
+                    <div class="px-6 pb-5 pt-2 text-slate-600 space-y-3">
+                        <p>${item.content}</p>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+    
+    document.getElementById('principles-container').innerHTML = principlesData.map(p => createCard(p, 'principles')).join('');
+    document.getElementById('basic-techniques-container').innerHTML = basicTechniquesData.map(p => createCard(p, 'basic')).join('');
+    document.getElementById('advanced-techniques-container').innerHTML = advancedTechniquesData.map(p => createCard(p, 'advanced')).join('');
+
+    document.getElementById('tools-container').innerHTML = toolsData.map(tool => `
+        <div class="bg-white rounded-xl p-6 shadow-sm border border-slate-200 hover:shadow-md transition-shadow">
+            <h3 class="font-bold text-xl text-slate-800 mb-2">${tool.name}</h3>
+            <p class="text-slate-600">${tool.description}</p>
+        </div>
+    `).join('');
+    
+    document.getElementById('libraries-container').innerHTML = librariesData.map(lib => `
+        <a href="${lib.url}" target="_blank" rel="noopener noreferrer" class="block bg-white rounded-xl p-5 shadow-sm border border-slate-200 hover:shadow-md hover:border-teal-400 transition-all">
+            <div class="flex justify-between items-center">
+                <h3 class="font-bold text-xl text-slate-800">${lib.name}</h3>
+                <span class="text-teal-500">→</span>
+            </div>
+        </a>
+    `).join('');
+
+    document.querySelectorAll('.card button').forEach(button => {
+        button.addEventListener('click', () => {
+            const card = button.parentElement;
+            card.classList.toggle('active');
+            const isExpanded = card.classList.contains('active');
+            button.setAttribute('aria-expanded', isExpanded);
+        });
+    });
+
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                navLinks.forEach(link => {
+                    link.classList.toggle('active', link.getAttribute('href').substring(1) === entry.target.id);
+                });
+                if (mobileNav.value !== `#${entry.target.id}`) {
+                    mobileNav.value = `#${entry.target.id}`;
+                }
+            }
+        });
+    }, { rootMargin: '-20% 0px -70% 0px', threshold: 0.1 });
+
+    sections.forEach(section => {
+        observer.observe(section);
+    });
+    
+    mobileNav.addEventListener('change', (e) => {
+        const targetId = e.target.value;
+        document.querySelector(targetId).scrollIntoView({ behavior: 'smooth' });
+    });
+
+    const ctx = document.getElementById('advancedTechniquesChart').getContext('2d');
+    const advancedChart = new Chart(ctx, {
+        type: 'radar',
+        data: {
+            labels: ['Complexity', 'Reasoning Depth', 'Task Versatility', 'Resource Cost', 'Ease of Use'],
+            datasets: [
+            {
+                label: 'Chain of Thought',
+                data: [6, 8, 7, 5, 8],
+                backgroundColor: 'rgba(20, 184, 166, 0.2)',
+                borderColor: 'rgb(20, 184, 166)',
+                pointBackgroundColor: 'rgb(20, 184, 166)',
+            }, 
+            {
+                label: 'Tree of Thoughts',
+                data: [9, 10, 8, 9, 4],
+                backgroundColor: 'rgba(245, 158, 11, 0.2)',
+                borderColor: 'rgb(245, 158, 11)',
+                pointBackgroundColor: 'rgb(245, 158, 11)',
+            },
+            {
+                label: 'ReAct',
+                data: [8, 7, 10, 8, 5],
+                backgroundColor: 'rgba(59, 130, 246, 0.2)',
+                borderColor: 'rgb(59, 130, 246)',
+                pointBackgroundColor: 'rgb(59, 130, 246)',
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                r: {
+                    angleLines: { color: 'rgba(0, 0, 0, 0.1)' },
+                    grid: { color: 'rgba(0, 0, 0, 0.1)' },
+                    pointLabels: { font: { size: 12 } },
+                    ticks: {
+                        backdropColor: 'rgba(255, 255, 255, 0.75)',
+                        stepSize: 2
+                    },
+                    suggestedMin: 0,
+                    suggestedMax: 10
+                }
+            },
+            plugins: {
+                legend: { position: 'top' },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            let label = context.dataset.label || '';
+                            if (label) {
+                                label += ': ';
+                            }
+                            label += context.raw;
+                            return label;
+                        }
+                    }
+                }
+            }
+        }
+    });
+});
+</script>
+</body>
+</html>
