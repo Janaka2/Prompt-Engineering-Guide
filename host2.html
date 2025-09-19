@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Full-Stack Serverless Deployment Guide</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: Arial, sans-serif; display: flex; min-height: 100vh; }
+    nav {
+      width: 270px;
+      background-color: #232347;
+      color: #fff;
+      position: sticky;
+      top: 0; height: 100vh; overflow-y: auto; padding: 28px 22px;
+    }
+    nav h2 { margin-bottom: 18px; font-size: 20px; border-bottom: 2px solid #444; padding-bottom: 12px; }
+    nav a { display: block; color: #b3e5fc; text-decoration: none; margin: 13px 0; font-size: 15px; transition: color 0.2s; }
+    nav a:hover { color: #40c4ff; }
+    main { flex: 1; padding: 46px; background: #f8fafd; }
+    main section { margin-bottom: 40px; }
+    main h2, main h3 { color: #263238; margin-bottom: 13px; }
+    main h3 { font-size: 19px; margin-top: 18px; }
+    main p { line-height: 1.7; color: #37474f; margin-bottom: 16px; }
+    table { width: 100%; border-collapse: collapse; margin-bottom: 24px; }
+    th, td { border: 1px solid #e0e0e0; padding: 8px; }
+    th { background: #e1f5fe; }
+    code, pre { background-color: #ececec; border-radius: 4px; font-family: monospace; }
+    pre { padding: 14px; margin-bottom: 18px; overflow-x: auto; }
+    @media (max-width: 900px) {
+      body { flex-direction: column; }
+      nav { width: 100%; height: auto; position: relative; }
+      main { padding: 22px; }
+    }
+    @media (max-width: 620px) {
+      main { padding: 8px; }
+      nav { padding: 10px 5px; }
+    }
+  </style>
+</head>
+<body>
+  <nav>
+    <h2>Deployment Guide</h2>
+    <a href="#domain">Domain Registration & DNS</a>
+    <a href="#architecture">Architecture & Providers</a>
+    <a href="#diagram">Diagram (Mermaid.js)</a>
+    <a href="#deployment">Deployment Per Service</a>
+    <a href="#domains">Domain & SSL Setup</a>
+    <a href="#cicd">CI/CD Pipelines</a>
+    <a href="#costs">Cost Comparison</a>
+  </nav>
+  <main>
+    <section id="domain">
+      <h2>A. Domain Registration & DNS Management</h2>
+      <h3>Recommended Registrars</h3>
+      <p>
+        <strong>Namecheap</strong>, <strong>Cloudflare</strong>, <strong>Porkbun</strong>, and <strong>GoDaddy</strong> are excellent for price, DNS control, privacy, and future-proofing integrations.<br /><br />
+        <strong>Namecheap</strong> is user-friendly, offers free WHOIS privacy and fair renewals. <strong>Cloudflare</strong> is power-user-friendly with advanced DNS and transparent pricing.
+      </p>
+      <h3>Domain Registration Steps</h3>
+      <ol>
+        <li>Create an account with a registrar.</li>
+        <li>Search and register your domain (e.g., myapp.com).</li>
+        <li>Enable WHOIS privacy if supported.</li>
+        <li>Optionally transfer DNS to Cloudflare for more DNS features.</li>
+      </ol>
+      <h3>Critical DNS Record Types</h3>
+      <ul>
+        <li><strong>A:</strong> Points to IPv4 address.</li>
+        <li><strong>AAAA:</strong> Points to IPv6 address.</li>
+        <li><strong>CNAME:</strong> Alias to another (sub)domain (e.g., app.myapp.com → Vercel endpoint).</li>
+        <li><strong>ALIAS/ANAME:</strong> For root domain redirection.</li>
+        <li><strong>MX:</strong> For domain-based email delivery.</li>
+      </ul>
+    </section>
+
+    <section id="architecture">
+      <h2>B. Architectural Blueprint & Cloud Provider Selection</h2>
+      <h3>Provider Comparison for Serverless Multi-Service Apps</h3>
+      <table>
+        <tr>
+          <th>Platform</th>
+          <th>Frontend</th>
+          <th>Python API</th>
+          <th>Java Service</th>
+          <th>Free Tiers</th>
+          <th>Simplicity</th>
+          <th>Scalability</th>
+        </tr>
+        <tr>
+          <td>AWS (S3, CloudFront, Fargate/Lambda)</td>
+          <td>Yes</td>
+          <td>Lambda/Fargate</td>
+          <td>Lambda/Fargate</td>
+          <td>1M+ API/Lambda, 1GB storage/mo</td>
+          <td>Complex, but enterprise grade</td>
+          <td>Automatic, robust</td>
+        </tr>
+        <tr>
+          <td>Google Cloud (Cloud Run, Firebase Storage)</td>
+          <td>Yes</td>
+          <td>Cloud Run</td>
+          <td>Cloud Run</td>
+          <td>2M+ requests/mo, 5GB storage</td>
+          <td>Setup required</td>
+          <td>Very scalable</td>
+        </tr>
+        <tr>
+          <td>Vercel + Google Cloud Run</td>
+          <td>Vercel Edge CDN</td>
+          <td>Cloud Run</td>
+          <td>Cloud Run</td>
+          <td>Generous; Cloud Run Free</td>
+          <td>Simplest for static/JS</td>
+          <td>High scale global</td>
+        </tr>
+        <tr>
+          <td>Netlify + Heroku</td>
+          <td>Netlify CDN</td>
+          <td>Heroku Container</td>
+          <td>Heroku Container</td>
+          <td>Generous but limited</td>
+          <td>Easy, but backend limits</td>
+          <td>Netlify scales static well</td>
+        </tr>
+      </table>
+      <p>For cost and ease, Vercel/Netlify (frontend) + Google Cloud Run (backends) is often the most efficient balance. AWS all-in-one offers ultimate flexibility, but is complex to manage start-to-finish.</p>
+      <h3 id="diagram">Text Diagram (Mermaid.js Mode)</h3>
+      <pre><code>graph TD
+  A[Public Internet]
+  A --> B[myapp.com DNS]
+  B --> C1[app.myapp.com → Frontend CDN]
+  B --> C2[api.myapp.com → Python Backend]
+  B --> C3[java-service.myapp.com → Java Service]
+  C1--&gt;C2
+  C1--&gt;C3
+</code></pre>
+      <h3>Java Service as Serverless</h3>
+      <p>
+        Deploy as a container (Docker) with Google Cloud Run (easiest, fastest scaling) or AWS Fargate, or use AWS Lambda with Spring Cloud Function and custom handler if function-based serverless is preferred for small endpoints.
+      </p>
+    </section>
+
+    <section id="deployment">
+      <h2>C. Deployment Guide per Service</h2>
+      <h3>Frontend (React, Next.js, Vite)</h3>
+      <ul>
+        <li>Build: <code>npm run build</code>.</li>
+        <li>On Vercel/Netlify: Connect GitHub repo, auto-detect project, attach custom domain/subdomain.</li>
+        <li>CDN and SSL/TLS are automatic. For S3/CloudFront, upload static files to S3, configure CloudFront distribution, point DNS as needed.</li>
+      </ul>
+      <h3>Backend (Python/Flask/FastAPI)</h3>
+      <ul>
+        <li>Write a <code>Dockerfile</code>, push to registry (e.g., GCR/ECR).</li>
+        <li>Google Cloud Run: Deploy container image, set scaling parameters, route custom domain/api.myapp.com.</li>
+        <li>AWS: Use Fargate with Load Balancer, or AWS Lambda for function-based microservices.</li>
+      </ul>
+      <h3>Java Service (Spring Boot)</h3>
+      <ul>
+        <li>Cloud Run: Build container, publish, attach <code>java-service.myapp.com</code> as custom domain.</li>
+        <li>AWS Lambda: Package Spring (fat JAR), deploy with custom handler (Spring Cloud Function), connect API Gateway and subdomain.</li>
+      </ul>
+    </section>
+
+    <section id="domains">
+      <h2>D. Custom Domain Configuration</h2>
+      <h3>DNS Settings</h3>
+      <ul>
+        <li>Create <code>CNAME</code> records for each subdomain (e.g., <code>app.myapp.com</code> → platform target endpoint).</li>
+        <li>For root (@), use <code>A</code> or <code>ALIAS/ANAME</code> as needed.</li>
+      </ul>
+      <h3>SSL/TLS (HTTPS)</h3>
+      <ul>
+        <li>All recommended platforms (Vercel, Netlify, Cloud Run, AWS CloudFront/ALB) auto-manage HTTPS with free certificates.</li>
+        <li>If manually managing (advanced): Use free Let's Encrypt + <code>certbot</code> or equivalent ACME client.</li>
+      </ul>
+    </section>
+
+    <section id="cicd">
+      <h2>E. CI/CD Pipeline Automation</h2>
+      <h3>Frontend Example (Vercel, GitHub Actions)</h3>
+      <pre><code>
+# .github/workflows/frontend-deploy.yml
+name: Frontend CI/CD
+on: [push]
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - uses: actions/setup-node@v3
+      with:
+        node-version: '20'
+    - run: npm ci
+    - run: npm run build
+    - uses: amondnet/vercel-action@v25
+      with:
+        vercel-token: ${{ secrets.VERCEL_TOKEN }}
+        vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
+        vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
+        working-directory: ./
+        prod: true
+      </code></pre>
+      <h3>Python API Example (Google Cloud Run, GitHub Actions)</h3>
+      <pre><code>
+# .github/workflows/backend-deploy.yml
+name: API CI/CD
+on: [push]
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: google-github-actions/setup-gcloud@v1
+        with:
+          project_id: ${{ secrets.GCP_PROJECT_ID }}
+          service_account_key: ${{ secrets.GCP_SA_KEY }}
+      - run: |
+          gcloud builds submit --tag gcr.io/$GCP_PROJECT_ID/api
+          gcloud run deploy api \
+            --image gcr.io/$GCP_PROJECT_ID/api \
+            --platform managed \
+            --region us-central1 \
+            --allow-unauthenticated
+      </code></pre>
+      <h3>Java Service Example (Cloud Run, GitHub Actions)</h3>
+      <pre><code>
+# .github/workflows/java-deploy.yml
+name: Java Service CI/CD
+on: [push]
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-java@v3
+        with:
+          java-version: '21'
+      - run: ./mvnw clean package
+      - uses: google-github-actions/setup-gcloud@v1
+        with:
+          project_id: ${{ secrets.GCP_PROJECT_ID }}
+          service_account_key: ${{ secrets.GCP_SA_KEY }}
+      - run: |
+          gcloud builds submit --tag gcr.io/$GCP_PROJECT_ID/java-service
+          gcloud run deploy java-service \
+            --image gcr.io/$GCP_PROJECT_ID/java-service \
+            --platform managed \
+            --region us-central1 \
+            --allow-unauthenticated
+      </code></pre>
+      <p>Add test steps (<code>pytest</code>, <code>npm test</code>) before deploy as needed for reliability.</p>
+    </section>
+
+    <section id="costs">
+      <h2>Cost Comparison Table</h2>
+      <table>
+        <tr>
+          <th>Service</th>
+          <th>Frontend (Vercel/Netlify)</th>
+          <th>Cloud Run (API/Java)</th>
+          <th>AWS Lambda/Fargate</th>
+        </tr>
+        <tr>
+          <td>Free Tier</td>
+          <td>125k+ invocations/mo, 100GB+ static</td>
+          <td>2M+ requests/mo, 1GB deploy</td>
+          <td>1M Lambda req, Fargate 750h/mo</td>
+        </tr>
+        <tr>
+          <td>Entry Paid</td>
+          <td>$20/mo (Pro, Vercel)</td>
+          <td>$0.10/100k requests</td>
+          <td>$0.20/1M req, Fargate pay-as-you-go</td>
+        </tr>
+        <tr>
+          <td>SSL/Custom Domain</td>
+          <td>Included</td>
+          <td>Included</td>
+          <td>Included</td>
+        </tr>
+      </table>
+      <p>Most projects run entirely free in early/MVP stages. Paid usage triggers as you scale. Budget for persistent data layer (like a managed DB) if needed.</p>
+    </section>
+  </main>
+</body>
+</html>
