@@ -1,0 +1,667 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Full-Stack Deployment Guide</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #2563eb;
+            --secondary: #3b82f6;
+            --accent: #60a5fa;
+            --light: #f3f4f6;
+            --dark: #1f2937;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --gray: #9ca3af;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            display: flex;
+            min-height: 100vh;
+            color: #333;
+            background-color: #f8fafc;
+            line-height: 1.6;
+        }
+        
+        /* Sidebar Navigation */
+        .sidebar {
+            width: 260px;
+            background: var(--dark);
+            color: white;
+            padding: 1.5rem 1rem;
+            overflow-y: auto;
+            position: fixed;
+            height: 100vh;
+            transition: all 0.3s ease;
+        }
+        
+        .sidebar-header {
+            padding: 0 0 1.5rem 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            margin-bottom: 1.5rem;
+        }
+        
+        .sidebar-header h2 {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-size: 1.5rem;
+        }
+        
+        .sidebar-header i {
+            color: var(--accent);
+        }
+        
+        .nav-links {
+            list-style: none;
+        }
+        
+        .nav-links li {
+            margin-bottom: 0.5rem;
+        }
+        
+        .nav-links a {
+            display: block;
+            color: var(--light);
+            padding: 0.75rem 1rem;
+            border-radius: 6px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+        
+        .nav-links a:hover, .nav-links a.active {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+        }
+        
+        .nav-links i {
+            margin-right: 0.75rem;
+            width: 20px;
+            text-align: center;
+        }
+        
+        /* Main Content */
+        .content {
+            flex: 1;
+            padding: 2rem;
+            margin-left: 260px;
+        }
+        
+        .section {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            padding: 2rem;
+            margin-bottom: 2rem;
+            scroll-margin-top: 20px;
+        }
+        
+        .section h2 {
+            color: var(--primary);
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 2px solid var(--light);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        
+        .section h3 {
+            color: var(--secondary);
+            margin: 1.5rem 0 1rem 0;
+        }
+        
+        .section p {
+            margin-bottom: 1rem;
+        }
+        
+        /* Code Blocks */
+        pre {
+            background: #1e293b;
+            color: #f1f5f9;
+            padding: 1.5rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 1.5rem 0;
+            font-family: 'Fira Code', monospace;
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+        
+        code {
+            background: #e2e8f0;
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+            font-family: 'Fira Code', monospace;
+            font-size: 0.9rem;
+        }
+        
+        pre code {
+            background: none;
+            padding: 0;
+            border-radius: 0;
+            color: inherit;
+        }
+        
+        /* Lists */
+        ul, ol {
+            padding-left: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        li {
+            margin-bottom: 0.5rem;
+        }
+        
+        /* Tables */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+        }
+        
+        th, td {
+            padding: 0.75rem 1rem;
+            text-align: left;
+            border: 1px solid #e2e8f0;
+        }
+        
+        th {
+            background: #f1f5f9;
+            font-weight: 600;
+        }
+        
+        tr:nth-child(even) {
+            background: #f8fafc;
+        }
+        
+        /* Notices */
+        .notice {
+            padding: 1rem 1.5rem;
+            border-left: 4px solid;
+            border-radius: 4px;
+            margin: 1.5rem 0;
+            background: #f8fafc;
+        }
+        
+        .notice-info {
+            border-color: var(--primary);
+        }
+        
+        .notice-warning {
+            border-color: var(--warning);
+        }
+        
+        .notice-success {
+            border-color: var(--success);
+        }
+        
+        /* Responsive */
+        @media (max-width: 992px) {
+            .sidebar {
+                width: 80px;
+                padding: 1rem 0.5rem;
+            }
+            
+            .sidebar-header h2 span, .nav-links a span {
+                display: none;
+            }
+            
+            .nav-links i {
+                margin-right: 0;
+                font-size: 1.25rem;
+            }
+            
+            .content {
+                margin-left: 80px;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            body {
+                flex-direction: column;
+            }
+            
+            .sidebar {
+                width: 100%;
+                height: auto;
+                position: relative;
+                padding: 1rem;
+            }
+            
+            .sidebar-header {
+                display: flex;
+                justify-content: center;
+                padding-bottom: 1rem;
+            }
+            
+            .nav-links {
+                display: flex;
+                flex-wrap: wrap;
+                justify-content: center;
+                gap: 0.5rem;
+            }
+            
+            .nav-links a {
+                padding: 0.5rem;
+            }
+            
+            .content {
+                margin-left: 0;
+                padding: 1.5rem;
+            }
+        }
+        
+        /* Diagram */
+        .diagram {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin: 1.5rem 0;
+            text-align: center;
+            border: 1px solid #e2e8f0;
+        }
+        
+        .diagram-placeholder {
+            width: 100%;
+            height: 300px;
+            background: #f1f5f9;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--gray);
+            font-style: italic;
+        }
+        
+        /* Section icons */
+        .section-icon {
+            background: var(--primary);
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar Navigation -->
+    <nav class="sidebar">
+        <div class="sidebar-header">
+            <h2><i class="fas fa-rocket"></i> <span>Deployment Guide</span></h2>
+        </div>
+        <ul class="nav-links">
+            <li><a href="#intro" class="active"><i class="fas fa-home"></i> <span>Introduction</span></a></li>
+            <li><a href="#domain"><i class="fas fa-globe"></i> <span>Domain & DNS</span></a></li>
+            <li><a href="#architecture"><i class="fas fa-project-diagram"></i> <span>Architecture</span></a></li>
+            <li><a href="#deployment"><i class="fas fa-code"></i> <span>Deployment</span></a></li>
+            <li><a href="#configuration"><i class="fas fa-cog"></i> <span>Configuration</span></a></li>
+            <li><a href="#cicd"><i class="fas fa-sync-alt"></i> <span>CI/CD</span></a></li>
+            <li><a href="#cost"><i class="fas fa-dollar-sign"></i> <span>Cost Analysis</span></a></li>
+        </ul>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="content">
+        <!-- Introduction Section -->
+        <section id="intro" class="section">
+            <h2><div class="section-icon"><i class="fas fa-home"></i></div> Introduction</h2>
+            <p>This guide provides a complete, step-by-step production deployment plan for a full-stack application on a custom domain using fully managed (serverless/PaaS) services.</p>
+            
+            <h3>Project Stack</h3>
+            <ul>
+                <li><strong>Backend API:</strong> Python (FastAPI/Flask)</li>
+                <li><strong>Frontend:</strong> Modern JavaScript (React/Next.js/Vite)</li>
+                <li><strong>Secondary Service:</strong> Java (Spring Boot) application</li>
+                <li><strong>Deployment Target:</strong> All services designed to be serverless or containerized</li>
+            </ul>
+            
+            <h3>Primary Objectives</h3>
+            <ul>
+                <li>Unified Custom Domain with subdomains</li>
+                <li>Cost-effectiveness with free tiers</li>
+                <li>Automatic scalability</li>
+                <li>Low-maintenance solution</li>
+                <li>Automated CI/CD pipelines</li>
+            </ul>
+            
+            <div class="notice notice-info">
+                <p><strong>Note:</strong> This guide assumes you are starting from scratch with no existing accounts and don't want to manage physical servers.</p>
+            </div>
+        </section>
+
+        <!-- Domain & DNS Section -->
+        <section id="domain" class="section">
+            <h2><div class="section-icon"><i class="fas fa-globe"></i></div> Domain Registration & DNS Management</h2>
+            
+            <h3>Recommended Registrar: Cloudflare</h3>
+            <p>Cloudflare offers domain registration at wholesale price, includes free WHOIS privacy, and provides a world-class free DNS management service with integrated CDN and security.</p>
+            
+            <h3>Process of Registering a New Domain</h3>
+            <ol>
+                <li>Create an account at <a href="https://www.cloudflare.com/">cloudflare.com</a></li>
+                <li>Go to "Register" and search for your desired domain name</li>
+                <li>Complete the purchase - Cloudflare will automatically configure itself as your DNS provider</li>
+            </ol>
+            
+            <h3>Critical DNS Records</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Record Type</th>
+                        <th>Purpose</th>
+                        <th>Usage</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>A / AAAA</code></td>
+                        <td>Points to IPv4/IPv6 addresses</td>
+                        <td>For servers with fixed IPs (avoid for serverless)</td>
+                    </tr>
+                    <tr>
+                        <td><code>CNAME</code></td>
+                        <td>Points subdomain to another domain</td>
+                        <td>Perfect for serverless platforms (our primary tool)</td>
+                    </tr>
+                    <tr>
+                        <td><code>ALIAS/ANAME</code></td>
+                        <td>Similar to CNAME for root domain</td>
+                        <td>For root domain with Cloudflare's "CNAME Flattening"</td>
+                    </tr>
+                    <tr>
+                        <td><code>MX</code></td>
+                        <td>Directs email for your domain</td>
+                        <td>Not needed for application deployment</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+
+        <!-- Architecture Section -->
+        <section id="architecture" class="section">
+            <h2><div class="section-icon"><i class="fas fa-project-diagram"></i></div> Architectural Blueprint</h2>
+            
+            <h3>Recommended Strategy: Google Cloud Platform (GCP) + Cloudflare</h3>
+            <p>This combination offers the best balance of simplicity, cost, and power for your specific stack, especially with the Java component.</p>
+            
+            <h4>Pros:</h4>
+            <ul>
+                <li>Unified platform for all services</li>
+                <li>Superb serverless container offering (Cloud Run)</li>
+                <li>Generous free tier ($300 credit, always-free quotas)</li>
+                <li>Simpler learning curve than AWS for this use case</li>
+            </ul>
+            
+            <h4>Cons:</h4>
+            <ul>
+                <li>Slightly less ubiquitous than AWS, but perfectly enterprise-grade</li>
+            </ul>
+            
+            <h3>Architecture Diagram</h3>
+            <div class="diagram">
+                <div class="diagram-placeholder">
+                    Architecture Diagram: User → Cloudflare DNS → GCP Services (Cloud Storage, Cloud Run)
+                </div>
+            </div>
+            
+            <h3>Handling the Java Service</h3>
+            <p>Google Cloud Run is the perfect solution. It can run any containerized application that listens on a port. You will package your Spring Boot application into a Docker container, and Cloud Run will manage its execution, scaling, and lifecycle completely.</p>
+        </section>
+
+        <!-- Deployment Section -->
+        <section id="deployment" class="section">
+            <h2><div class="section-icon"><i class="fas fa-code"></i></div> Deployment Guide Per Service</h2>
+            
+            <h3>1. Frontend (JavaScript - React/Vite)</h3>
+            <p><strong>Service:</strong> Google Cloud Storage (GCS) + Cloudflare CDN</p>
+            
+            <h4>Process:</h4>
+            <ol>
+                <li><strong>Build:</strong> Run your build command (e.g., <code>npm run build</code>)</li>
+                <li><strong>Create Bucket:</strong> In Google Cloud Console, create a GCS bucket named after your domain</li>
+                <li><strong>Upload:</strong> Upload the contents of your build folder to the bucket</li>
+                <li><strong>Configure:</strong> Set the bucket's permissions to be publicly readable</li>
+            </ol>
+            
+            <h3>2. Backend (Python - FastAPI/Flask)</h3>
+            <p><strong>Service:</strong> Google Cloud Run</p>
+            
+            <h4>Dockerfile Example:</h4>
+            <pre><code># Use a slim Python image
+FROM python:3.11-slim
+
+# Set working directory
+WORKDIR /app
+
+# Copy requirements and install dependencies
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copy the rest of the application code
+COPY . .
+
+# Expose the port your app runs on
+EXPOSE 8000
+
+# Command to run the application
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]</code></pre>
+            
+            <h3>3. Secondary Service (Java Spring Boot)</h3>
+            <p><strong>Service:</strong> Google Cloud Run</p>
+            
+            <h4>Dockerfile Example (Multi-stage build):</h4>
+            <pre><code># Stage 1: Build the application
+FROM maven:3.8.6-eclipse-temurin-17 AS builder
+WORKDIR /app
+COPY pom.xml .
+COPY src ./src
+RUN mvn package -DskipTests
+
+# Stage 2: Create the runtime image
+FROM eclipse-temurin:17-jre-alpine
+WORKDIR /app
+# Copy the built JAR file from the builder stage
+COPY --from=builder /app/target/*.jar app.jar
+# Expose the port your app runs on
+EXPOSE 8080
+# Command to run the application
+ENTRYPOINT ["java", "-jar", "app.jar"]</code></pre>
+        </section>
+
+        <!-- Configuration Section -->
+        <section id="configuration" class="section">
+            <h2><div class="section-icon"><i class="fas fa-cog"></i></div> Custom Domain Configuration</h2>
+            
+            <h3>Cloudflare DNS Setup</h3>
+            <p>This is where Cloudflare simplifies everything:</p>
+            
+            <h4>For Subdomains (api, java):</h4>
+            <p>Create a <strong>CNAME</strong> record for each service:</p>
+            <ul>
+                <li><strong>Name:</strong> <code>api</code> (for api.myapp.com)</li>
+                <li><strong>Target:</strong> The .run.app URL from Google Cloud Run</li>
+                <li><strong>Proxy status:</strong> Proxied (Orange Cloud) - enables CDN and SSL</li>
+            </ul>
+            
+            <h4>For Root Domain:</h4>
+            <p>Create a <strong>CNAME</strong> record for the root:</p>
+            <ul>
+                <li><strong>Name:</strong> <code>@</code> (represents the root myapp.com)</li>
+                <li><strong>Target:</strong> The hostname of your Google Cloud Storage bucket</li>
+            </ul>
+            
+            <h3>SSL/TLS Configuration</h3>
+            <p>In your Cloudflare dashboard, go to the <strong>SSL/TLS</strong> section and ensure the encryption mode is set to "<strong>Full (strict)</strong>". This ensures traffic is encrypted from end-to-end.</p>
+            
+            <div class="notice notice-success">
+                <p><strong>Tip:</strong> Both Cloudflare and Google provide automatic SSL certificates for free.</p>
+            </div>
+        </section>
+
+        <!-- CI/CD Section -->
+        <section id="cicd" class="section">
+            <h2><div class="section-icon"><i class="fas fa-sync-alt"></i></div> CI/CD Pipeline Automation</h2>
+            
+            <h3>Python API CI/CD (GitHub Actions)</h3>
+            <pre><code>name: Deploy Python API to Cloud Run
+
+on:
+  push:
+    branches: [ "main" ]
+    paths:
+      - 'path/to/python-api/**'
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./path/to/python-api
+
+    steps:
+    - uses: actions/checkout@v4
+    - uses: google-github-actions/auth@v2
+      with:
+        credentials_json: '${{ secrets.GCP_SA_KEY }}'
+    - uses: google-github-actions/setup-gcloud@v2
+
+    - name: Build and Push Container
+      run: |-
+        gcloud builds submit --tag gcr.io/${{ secrets.GCP_PROJECT_ID }}/my-python-api
+
+    - name: Deploy to Cloud Run
+      run: |-
+        gcloud run deploy my-python-api \
+          --image gcr.io/${{ secrets.GCP_PROJECT_ID }}/my-python-api \
+          --platform managed \
+          --region us-central1 \
+          --allow-unauthenticated</code></pre>
+            
+            <h3>Java Service CI/CD</h3>
+            <p>The workflow is nearly identical to the Python one, just pointing to a different directory.</p>
+            
+            <h3>Frontend CI/CD</h3>
+            <pre><code>name: Deploy Frontend to GCS
+
+on:
+  push:
+    branches: [ "main" ]
+    paths:
+      - 'path/to/frontend/**'
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./path/to/frontend
+
+    steps:
+    - uses: actions/checkout@v4
+    - uses: google-github-actions/auth@v2
+      with:
+        credentials_json: '${{ secrets.GCP_SA_KEY }}'
+    - uses: google-github-actions/setup-gcloud@v2
+
+    - name: Install Dependencies and Build
+      run: |-
+        npm ci
+        npm run build
+
+    - name: Deploy to GCS Bucket
+      run: |-
+        gsutil -m rsync -d -r ./build gs://${{ secrets.GCS_BUCKET_NAME }}</code></pre>
+        </section>
+
+        <!-- Cost Analysis Section -->
+        <section id="cost" class="section">
+            <h2><div class="section-icon"><i class="fas fa-dollar-sign"></i></div> Cost Analysis</h2>
+            
+            <h3>Estimated Costs</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Service</th>
+                        <th>Cost</th>
+                        <th>Notes</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Domain (Cloudflare)</td>
+                        <td>$10-$15/year</td>
+                        <td>Varies by TLD</td>
+                    </tr>
+                    <tr>
+                        <td>Cloudflare Services</td>
+                        <td><strong>Free</strong></td>
+                        <td>DNS, CDN, SSL, Firewall</td>
+                    </tr>
+                    <tr>
+                        <td>Google Cloud Platform</td>
+                        <td><strong>Free tier + usage</strong></td>
+                        <td>2 million Cloud Run requests/month, 5 GB Cloud Storage free</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Total (Low Traffic)</strong></td>
+                        <td><strong>$0.00 - $5.00/month</strong></td>
+                        <td>For personal/small projects</td>
+                    </tr>
+                </tbody>
+            </table>
+            
+            <div class="notice notice-info">
+                <p><strong>Note:</strong> This architecture meets all your objectives: unified custom domain, cost-effectiveness, automatic scalability, minimal maintenance, and full automation.</p>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        // Simple JavaScript for navigation
+        document.addEventListener('DOMContentLoaded', function() {
+            const navLinks = document.querySelectorAll('.nav-links a');
+            
+            navLinks.forEach(link => {
+                link.addEventListener('click', function(e) {
+                    navLinks.forEach(l => l.classList.remove('active'));
+                    this.classList.add('active');
+                });
+            });
+            
+            // Update active link on scroll
+            window.addEventListener('scroll', function() {
+                const sections = document.querySelectorAll('.section');
+                let currentSection = '';
+                
+                sections.forEach(section => {
+                    const sectionTop = section.offsetTop;
+                    if (pageYOffset >= sectionTop - 100) {
+                        currentSection = section.getAttribute('id');
+                    }
+                });
+                
+                navLinks.forEach(link => {
+                    link.classList.remove('active');
+                    if (link.getAttribute('href').substring(1) === currentSection) {
+                        link.classList.add('active');
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>
